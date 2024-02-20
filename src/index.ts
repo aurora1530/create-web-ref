@@ -12,15 +12,13 @@ type Reference = {
   type?: string;
 };
 
-const getURLObject = (): URL => {
-  return new URL(document.URL);
-};
+const urlObj = new URL(document.URL);
 
 const getTitle = (): Reference['title'] => {
   return (
     document.title ||
     document.getElementsByTagName('title')[0].textContent ||
-    getURLObject().hostname
+    urlObj.hostname
   );
 };
 
@@ -30,13 +28,13 @@ const getAuthor = (): Reference['author'] => {
     document.querySelector('meta[property="author" i]') ??
     document.querySelector('meta[name="article:author" i]')
   )?.getAttribute('content');
-  return authorMeta ?? getURLObject().hostname;
+  return authorMeta ?? urlObj.hostname;
 };
 
 const getSiteName = (): Reference['siteName'] => {
   return (
     document.querySelector('meta[property="og:site_name" i]')?.getAttribute('content') ??
-    getURLObject().hostname
+    urlObj.hostname
   );
 };
 
@@ -68,7 +66,7 @@ const getReference = (): Reference => {
     title: getTitle(),
     lastModified: getLastModified(),
     lastVisited: getLastVisited(),
-    url: getURLObject().href,
+    url: urlObj.href,
     description: getDescription(),
   };
 };
