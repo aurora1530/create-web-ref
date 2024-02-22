@@ -6,13 +6,77 @@ type Reference = {
   lastVisited: string;
   url: string;
   description?: string;
-  address?: string;
+  address?: Address;
   organization?: string;
   note?: string;
   type?: string;
 };
 
+type Address = {
+  country: string;
+  locality: string;
+  region: string;
+  postalCode: string;
+  streetAddress: string;
+};
+
 const urlObj = new URL(document.URL);
+
+function findShallowestValueByKey<T extends object, K extends PropertyKey>(
+  obj: T,
+  key: K
+) {
+  let result: unknown;
+  let shallowestLevel = Infinity;
+
+  function search(o: any, currentLevel: number): void {
+    if (currentLevel >= shallowestLevel) return;
+
+    if (typeof o === 'object' && o !== null) {
+      if (key in o && currentLevel < shallowestLevel) {
+        result = o[key];
+        shallowestLevel = currentLevel;
+        return; // if we found first value, we don't need to go deeper
+      }
+      for (const k in o) {
+        search(o[k], currentLevel + 1);
+      }
+    }
+  }
+
+  search(obj, 0);
+  return result;
+}
+
+const parseJsonLd = () => {
+  const jsons = Array.from(
+    document.querySelectorAll('script[type="application/ld+json"]')
+  ).map((ele) => ele.textContent);
+
+  const returnObj: {
+    address?: Address;
+    organization?: string;
+    author?: string;
+  } = {};
+  jsons.forEach((json) => {
+    if (!json) return;
+    const obj = JSON.parse(json) as Object | null;
+    if (!obj) return;
+
+    if (returnObj.author === undefined) {
+      const author = findShallowestValueByKey(obj, 'author');
+      if (author) {
+        returnObj.author =
+          typeof author === 'string'
+            ? author
+            : typeof author === 'object' && 'name' in author
+            ? (author.name as string)
+            : undefined;
+      }
+    }
+  });
+  return returnObj;
+};
 
 const getTitle = (): Reference['title'] => {
   return (
@@ -72,7 +136,12 @@ const getReference = (): Reference => {
 };
 
 const main = () => {
+  const parsedJsonLd = parseJsonLd();
   const reference = getReference();
+  reference.address = parsedJsonLd.address;
+  reference.organization = parsedJsonLd.organization;
+  reference.author = parsedJsonLd.author ?? reference.author;
+
   navigator.clipboard.writeText(JSON.stringify(reference, null, 2)).then(
     () => {
       alert('Reference copied to clipboard');
