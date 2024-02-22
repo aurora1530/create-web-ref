@@ -13,7 +13,7 @@
   },
   "scripts": {
     "prebuild": "tsc",
-    "minify": "node dist/build.js dist/index.js",
+    "minify": "node dist/build.js",
     "build": "yarn tsc && yarn minify"
   }
 }
