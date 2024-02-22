@@ -79,7 +79,10 @@ const parseLdJson = () => {
       const organization =
         findShallowestValueByKey(obj, 'organization') ??
         findShallowestValueByKey(obj, 'Organization') ??
-        findShallowestValueByKey(obj, 'ORGANIZATION');
+        findShallowestValueByKey(obj, 'ORGANIZATION') ??
+        findShallowestValueByKey(obj, 'publisher') ??
+        findShallowestValueByKey(obj, 'Publisher') ??
+        findShallowestValueByKey(obj, 'PUBLISHER');
       if (organization) {
         returnObj.organization =
           typeof organization === 'string'
