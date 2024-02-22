@@ -48,7 +48,7 @@ function findShallowestValueByKey<T extends object, K extends PropertyKey>(
   return result;
 }
 
-const parseJsonLd = () => {
+const parseLdJson = () => {
   const jsons = Array.from(
     document.querySelectorAll('script[type="application/ld+json"]')
   ).map((ele) => ele.textContent);
@@ -71,6 +71,21 @@ const parseJsonLd = () => {
             ? author
             : typeof author === 'object' && 'name' in author
             ? (author.name as string)
+            : undefined;
+      }
+    }
+
+    if (returnObj.organization === undefined) {
+      const organization =
+        findShallowestValueByKey(obj, 'organization') ??
+        findShallowestValueByKey(obj, 'Organization') ??
+        findShallowestValueByKey(obj, 'ORGANIZATION');
+      if (organization) {
+        returnObj.organization =
+          typeof organization === 'string'
+            ? organization
+            : typeof organization === 'object' && 'name' in organization
+            ? (organization.name as string)
             : undefined;
       }
     }
@@ -136,7 +151,7 @@ const getReference = (): Reference => {
 };
 
 const main = () => {
-  const parsedJsonLd = parseJsonLd();
+  const parsedJsonLd = parseLdJson();
   const reference = getReference();
   reference.address = parsedJsonLd.address;
   reference.organization = parsedJsonLd.organization;
