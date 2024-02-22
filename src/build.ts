@@ -4,7 +4,7 @@ import url from 'url';
 import fs from 'fs';
 import path from 'path';
 
-const fileOrder = ['ldJsonParser', 'index'];
+const fileOrder = ['types', 'ldJsonParser', 'index'];
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const filePaths = fileOrder.map((file) => path.join(__dirname, '../dist/', `${file}.js`));
 const outputPath = path.join(__dirname, '../out', 'bookmarklet.js');
